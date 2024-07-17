@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Search Movies</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <a href="{{ url_for('index') }}">Home</a>
+    <h1>Search Movies To Rate</h1>
+    <form method="POST" action="{{ url_for('search') }}">
+        <label for="query">Search:</label>
+        <input type="text" id="query" name="query" required>
+        <button type="submit">Search</button>
+    </form>
+    <ul>
+        {% for movie in movies %}
+        <li>
+            {{ movie['title'] }} 
+            <form method="POST" action="{{ url_for('rate_movie') }}">
+                <input type="hidden" name="movie_id" value="{{ movie['movieId'] }}">
+                <label for="rating">Rating:</label>
+                <input type="number" name="rating" min="0.5" max="5" step="0.5" required>
+                <button type="submit">Rate</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('recommendations') }}">Get Recommendations</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+</body>
+</html>

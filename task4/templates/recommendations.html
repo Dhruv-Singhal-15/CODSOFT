@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+
+<body>
+    <a href="{{ url_for('index') }}">Home</a>
+    <h1>Your Recommendations</h1>
+    <ul>
+        {% for recommendation in recommendations %}
+        <li>{{ recommendation['title'] }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('search') }}">Back to Search</a>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <ul>
+        {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
+</body>
+
+</html>
