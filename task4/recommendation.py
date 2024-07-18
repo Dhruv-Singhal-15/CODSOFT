@@ -2,19 +2,21 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 
+# global USER_ID_OFFSET
+USER_ID_OFFSET = 610
+
 movies = pd.read_csv('./movie-dataset/movies.csv')  
 ratings = pd.read_csv('./movie-dataset/ratings.csv')  
 
 user_movie_ratings = ratings.pivot(index='userId', columns='movieId', values='rating')
-
 user_movie_ratings.fillna(0, inplace=True)
-
 user_similarity = cosine_similarity(user_movie_ratings)
-
 user_similarity_df = pd.DataFrame(user_similarity, index=user_movie_ratings.index, columns=user_movie_ratings.index)
 
 def get_user_recommendations(user_id, num_recommendations=5):
 
+    user_id += USER_ID_OFFSET
+    print(user_id)
     if user_id not in user_movie_ratings.index:
         print("User ID not found!")
         return None
@@ -31,15 +33,39 @@ def get_user_recommendations(user_id, num_recommendations=5):
 
     return recommendations.sort_values(ascending=False).head(num_recommendations)
 
-def add_new_user(user_id, movie_ratings):
+def update_user_ratings(user_id, movie_ratings):
     global user_movie_ratings, user_similarity_df
     
-    user_movie_ratings.loc[user_id] = 0  
+    user_id += USER_ID_OFFSET
+
+    if user_id not in user_movie_ratings.index:
+        user_movie_ratings.loc[user_id] = 0  
+    
     for movie_id, rating in movie_ratings.items():
         user_movie_ratings.at[user_id, movie_id] = rating
     
     user_similarity = cosine_similarity(user_movie_ratings)
     user_similarity_df = pd.DataFrame(user_similarity, index=user_movie_ratings.index, columns=user_movie_ratings.index)
+
+def delete_user(user_id):
+    if user_id + USER_ID_OFFSET in user_movie_ratings.index:
+        user_movie_ratings.drop(user_id + USER_ID_OFFSET, inplace=True)
+        user_similarity_df.drop(user_id + USER_ID_OFFSET, inplace=True)
+        user_similarity_df.drop(columns=[user_id + USER_ID_OFFSET], inplace=True)
+
+
+
+
+
+# def add_new_user(user_id, movie_ratings):
+#     global user_movie_ratings, user_similarity_df
+    
+#     user_movie_ratings.loc[user_id] = 0  
+#     for movie_id, rating in movie_ratings.items():
+#         user_movie_ratings.at[user_id, movie_id] = rating
+    
+#     user_similarity = cosine_similarity(user_movie_ratings)
+#     user_similarity_df = pd.DataFrame(user_similarity, index=user_movie_ratings.index, columns=user_movie_ratings.index)
 
 
 # def main():

@@ -28,6 +28,8 @@ def classify_intent(user_input):
     doc = nlp(user_input)
     if any(token.lemma_ in ["hi", "hello", "hey"] for token in doc):
         return "greeting"
+    elif "old" in [token.lemma_ for token in doc] and "you" in [token.lemma_ for token in doc]:
+        return "age_query"
     elif "how" in [token.lemma_ for token in doc] and "you" in [token.lemma_ for token in doc]:
         return "how_are_you"
     elif "name" in [token.lemma_ for token in doc] and "your" in [token.lemma_ for token in doc]:
@@ -36,8 +38,6 @@ def classify_intent(user_input):
         return "goodbye"
     elif any(token.lemma_ in ["can", "what"] and "do" in [token.lemma_ for token in doc] for token in doc):
         return "capabilities"
-    elif "old" in [token.lemma_ for token in doc] and "you" in [token.lemma_ for token in doc]:
-        return "age_query"
     elif "joke" in [token.lemma_ for token in doc]:
         return "joke"
     elif "weather" in [token.lemma_ for token in doc]:

@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
-    <a href="{{ url_for('index') }}">Home</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
     <h1>Search Movies To Rate</h1>
     <form method="POST" action="{{ url_for('search') }}">
         <label for="query">Search:</label>
@@ -26,6 +26,18 @@
         </li>
         {% endfor %}
     </ul>
+
+    <h2>Your Rated Movies:</h2>
+    <ul>
+        {% for rating in user_ratings %}
+            {% set movie = movies_df[movies_df['movieId'] == rating.movie_id].iloc[0] %}
+            <li>
+                {{ movie['title'] }} 
+                <span>Your Rating: {{ rating.rating }}</span>
+            </li>
+        {% endfor %}
+    </ul>
+
     <a href="{{ url_for('recommendations') }}">Get Recommendations</a>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}

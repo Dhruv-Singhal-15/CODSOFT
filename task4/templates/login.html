@@ -16,7 +16,7 @@
         <button type="submit">Login</button>
     </form>
     <a href="{{ url_for('signup') }}">Don't have an account? Sign up here</a>
-    <!-- {% with messages = get_flashed_messages(with_categories=true) %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
@@ -24,6 +24,6 @@
                 {% endfor %}
             </ul>
         {% endif %}
-    {% endwith %} -->
+    {% endwith %}
 </body>
 </html>
