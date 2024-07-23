@@ -6,7 +6,20 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
     <a href="{{ url_for('logout') }}">Logout</a>
+    <a href="{{ url_for('index') }}">Home</a>
+    <hr>
     <h1>Search Movies To Rate</h1>
     <form method="POST" action="{{ url_for('search') }}">
         <label for="query">Search:</label>
@@ -38,15 +51,16 @@
         {% endfor %}
     </ul>
 
-    <a href="{{ url_for('recommendations') }}">Get Recommendations</a>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
+    <a href="{{ url_for('recommendations') }}"><em>Get Recommendations</em></a>
+
+    <script>
+        setTimeout(function () {
+            var flashes = document.querySelector('.flashes');
+            if (flashes) {
+                flashes.remove();
+            }
+        }, 2000); 
+    </script>
+
 </body>
 </html>

@@ -19,20 +19,6 @@ form {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-label {
-    display: block;
-    margin-bottom: 8px;
-    color: #333;
-}
-
-input[type="text"], input[type="password"], input[type="number"] {
-    width: 95%;
-    padding: 8px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
 input[type="submit"] {
     width: 100%;
     padding: 10px;
@@ -42,10 +28,6 @@ input[type="submit"] {
     color: white;
     font-size: 16px;
     cursor: pointer;
-}
-
-input[type="submit"]:hover {
-    background-color: #45a049;
 }
 
 ul {
@@ -68,4 +50,76 @@ a {
     display: block;
     text-align: center;
     margin: 20px 0;
+}
+
+
+/*  */
+
+form .form-group {
+    margin-bottom: 15px;
+}
+
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    margin-inline-start: auto;
+}
+
+dd {
+    margin-inline-start: auto;
+}
+ 
+/* Focus state */
+form input[type="text"]:focus,
+form input[type="password"]:focus,
+form input[type="email"]:focus {
+    border-color: green;
+    outline: none;
+    box-shadow: 0 0 5px rgba(48, 202, 143, 0.5);
+}
+
+/* Button styling */
+form button {
+    width: 100%;
+    padding: 10px;
+    background-color: forestgreen;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+form button:hover {
+    background-color: limegreen;
+}
+
+/* Error message styling */
+form .error-message {
+    color: red;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+/* Additional styling for text areas */
+form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    box-sizing: border-box;
+    resize: vertical;
 }

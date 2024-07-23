@@ -1,21 +1,24 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, logging
 from flask_sqlalchemy import SQLAlchemy
-from flask_wtf.csrf import CSRFProtect
+from forms import LoginForm, RegisterForm
 from werkzeug.security import generate_password_hash, check_password_hash
 import pandas as pd
 from recommendation import get_user_recommendations, update_user_ratings
 
 app = Flask(__name__)
+app.config['SECRET_KEY'] = 'dhruv1;s2secret#key$'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
-app.config['SECRET_KEY'] = 'super_secret_key'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 movies_df = pd.read_csv('./movie-dataset/movies.csv')
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), unique=True, nullable=False)
-    password = db.Column(db.String(150), nullable=False)
+    name = db.Column(db.String(15), unique=True)
+    email = db.Column(db.String(50), unique=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    password = db.Column(db.String(150), nullable=False, unique=True)
 
 class Rating(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -27,36 +30,44 @@ class Rating(db.Model):
 def index():
     return render_template('index.html')
 
-@app.route('/signup', methods=['GET', 'POST'])
-def signup():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = generate_password_hash(password)
-        new_user = User(username=username, password=hashed_password)
+@app.route('/register/', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm(request.form)
+    if request.method == 'POST' and form.validate:
+        hashed_password = generate_password_hash(form.password.data)
+        new_user = User(
+            username=form.username.data,
+            name=form.name.data,
+            email=form.email.data,
+            password=hashed_password )
         db.session.add(new_user)
         db.session.commit()
+        flash('You have successfully registered', 'success')
         return redirect(url_for('login'))
-    return render_template('signup.html')
+    else: # method is GET
+        return render_template('register.html',form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        user = User.query.filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            session['user_id'] = user.id
-            return redirect(url_for('search'))
+    form = LoginForm(request.form)
+    if request.method == 'POST' and form.validate:
+        user = User.query.filter_by(email=form.email.data).first()
+        if user and check_password_hash(user.password, form.password.data):
+            flash('You have successfully logged in.',"success")
+            session['logged_in'] = True
+            session['use_id'] = user.id
+            session['username'] = user.username
+            return redirect(url_for("search"))
         else:
-            flash("Invalid credentials. Please try again.")
-    return render_template('login.html')
+            flash("Invalid credentials. Please try again.","Danger")
+            return redirect(url_for('login'))
+    return render_template('login.html',form=form)
 
 
-@app.route('/logout')
+@app.route('/logout/')
 def logout():
-    session.pop('user_id', None)
+    session['logged_in'] = False
     flash('Logged out successfully.', 'success')
     return redirect(url_for('index'))
 
@@ -67,7 +78,7 @@ def delete_user():
         flash("You need to login first.")
         return redirect(url_for('login'))
     
-    user_id = session['user_id']
+    user_id = session['use_id']
     
     user = User.query.get(user_id)
     if user:
@@ -87,13 +98,12 @@ def delete_user():
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
-    if 'user_id' not in session:
+    if session['logged_in']==False:
         flash("You need to login first.")
         return redirect(url_for('login'))
     
-    user_id = session['user_id']
-    user = User.query.get(user_id)
-    user_ratings = Rating.query.filter_by(user_id=user_id).all()
+    u_id = session['use_id']
+    user_ratings = Rating.query.filter_by(user_id=u_id).all()
     
     movies_df = pd.read_csv('./movie-dataset/movies.csv')  
 
@@ -106,11 +116,11 @@ def search():
 
 @app.route('/rate', methods=['POST'])
 def rate_movie():
-    if 'user_id' not in session:
+    if session['logged_in']==False:
         flash("You need to login first.")
         return redirect(url_for('login'))
 
-    user_id = session['user_id']
+    user_id = session['use_id']
     movie_id = int(request.form['movie_id'])
     rating_value = float(request.form['rating'])
     rating = Rating.query.filter_by(user_id=user_id, movie_id=movie_id).first()
@@ -131,11 +141,11 @@ def rate_movie():
 
 @app.route('/recommendations')
 def recommendations():
-    if 'user_id' not in session:
+    if session['logged_in']==False:
         flash("You need to login first.")
         return redirect(url_for('login'))
 
-    user_id = session['user_id']
+    user_id = session['use_id']
     
     user_ratings = {rating.movie_id: rating.rating for rating in Rating.query.filter_by(user_id=user_id).all()}
     # print(user_ratings)
@@ -152,3 +162,8 @@ def recommendations():
         ]
     
     return render_template('recommendations.html', recommendations=recommended_movies)
+
+# to run initially: set Flask_APPP=app.py
+# to run initially(macOS or Linux): export Flask_APPP=app.py
+
+# after that , use : flask run
